@@ -38,8 +38,9 @@ end
 
 # sitemap usage
 
-sitemap.urls          #> ['http://example.com/page', ...] 
-sitemap.entries.first #> Struct(url: 'http://example.com/page', lastmod: DateTime.utc, changefreq: :monthly, priority: 0.5)
+sitemap.entries.first #> Struct(loc: 'http://example.com/page', lastmod: DateTime.utc, changefreq: :monthly, priority: 0.5)
+
+urls = sitemap.entries.map(&:loc)
 ```
 
 ## Development

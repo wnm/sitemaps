@@ -9,6 +9,8 @@ module Sitemaps
       document = REXML::Document.new(source)
       entries  = document.elements.to_a("/urlset/url").map do |root|
         loc  = parse_loc(root)
+        next if loc.nil?
+
         mod  = parse_lastmod(root)
         freq = parse_changefreq(root)
         pri  = parse_priority(root)
@@ -16,7 +18,14 @@ module Sitemaps
         Sitemaps::Entry.new(loc, mod, freq, pri)
       end
 
-      Sitemaps::Sitemap.new(entries)
+      sitemaps = document.elements.to_a("/sitemapindex/sitemap").map do |root|
+        loc  = parse_loc(root)
+        mod  = parse_lastmod(root)
+
+        Sitemaps::Submap.new(loc, mod)
+      end
+
+      Sitemaps::Sitemap.new(entries, sitemaps)
     end
 
     def self.parse_loc(root)

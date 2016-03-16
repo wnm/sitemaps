@@ -2,41 +2,39 @@ require 'spec_helper'
 
 describe Sitemaps do
 
+  def sitemap_file
+    @sitemap_file ||= begin
+      path = File.join(File.dirname(__FILE__), "./fixtures/sitemap.valid.xml")
+      File.read(path).freeze
+    end
+  end
+
+  def sitemap_fixture
+    @sitemap_fixture ||= Sitemaps.parse(sitemap_file)
+  end
+
+  def sitemap_index_file
+    @sitemap_file ||= begin
+      path = File.join(File.dirname(__FILE__), "./fixtures/sitemap_index.valid.xml")
+      File.read(path).freeze
+    end
+  end
+
+  def sitemap_index_fixture
+    @sitemap_index_fixture ||= Sitemaps.parse(sitemap_index_file)
+  end
+
   it 'has a version number' do
     expect(Sitemaps::VERSION).not_to be nil
   end
 
   context "sitemap" do
-
-    def valid_file
-      @valid_file ||= begin
-        path = File.join(File.dirname(__FILE__), "./fixtures/sitemap.valid.xml")
-        File.read(path).freeze
-      end
-    end
-
-    def valid_fixture
-      @valid_fixture ||= Sitemaps.parse(valid_file)
-    end
-    
     it "can parse a valid sitemap" do
-      sitemap = valid_fixture
+      sitemap = sitemap_fixture
       expect(sitemap).not_to be_nil
     end
 
-    it "can present a list of urls" do
-      urls = [
-        URI.parse("http://www.example.com/"),
-        URI.parse("http://www.example.com/c?item=12&desc="),
-        URI.parse("http://www.example.com/c?item=73&desc="),
-        URI.parse("http://www.example.com/c?item=74&desc="),
-        URI.parse("http://www.example.com/c?item=83&desc=")
-      ]
-
-      expect(valid_fixture.urls.to_a).to eql(urls)
-    end
-
-    it "can present a list of entries, which expose priority, lastmod, etc." do
+    it "can present a list of entries" do
       SE = Sitemaps::Entry
       entries = [
         SE.new(URI.parse("http://www.example.com/"), Time.parse("2005-01-01"), :monthly, 0.8),
@@ -46,7 +44,24 @@ describe Sitemaps do
         SE.new(URI.parse("http://www.example.com/c?item=83&desc="), Time.parse("2004-11-23"), nil, 0.5)
       ]
 
-      expect(valid_fixture.entries).to eql(entries)
+      expect(sitemap_fixture.entries).to eql(entries)
+    end
+  end
+
+  context "sitemap_index" do
+    it "can parse a valid sitemap index" do
+      sitemap = sitemap_index_fixture
+      expect(sitemap).not_to be_nil
+    end
+
+    it "can present a list of entries, which expose priority, lastmod, etc." do
+      SM = Sitemaps::Submap
+      entries = [
+        SM.new(URI.parse("http://www.example.com/sitemap1.xml.gz"), Time.parse("2004-10-01T18:23:17+00:00")),
+        SM.new(URI.parse("http://www.example.com/sitemap2.xml.gz"), Time.parse("2005-01-01"))
+      ]
+
+      expect(sitemap_index_fixture.sitemaps).to eql(entries)
     end
   end
 

@@ -3,6 +3,30 @@ require 'rexml/document'
 
 describe Sitemaps::Parser do
 
+  it "can parse a location url" do
+    root = "<url><loc>http://example.com/</loc></url>"
+    root = REXML::Document.new(root).root
+
+    result = Sitemaps::Parser.parse_loc(root)
+    expect(result).to eq(URI.parse("http://example.com/"))
+  end
+
+  it "handles a missing loc with nil" do
+    root = "<url></url>"
+    root = REXML::Document.new(root).root
+
+    result = Sitemaps::Parser.parse_loc(root)
+    expect(result).to be_nil
+  end
+
+  it "handles a malformed loc with nil" do
+    root = "<url><lastmod>not a uri</lastmod></url>"
+    root = REXML::Document.new(root).root
+
+    result = Sitemaps::Parser.parse_loc(root)
+    expect(result).to be_nil
+  end
+
   it "can parse a lastmod timestamp" do
     root = "<url><lastmod>2016-04-15</lastmod></url>"
     root = REXML::Document.new(root).root
