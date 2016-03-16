@@ -46,6 +46,9 @@ describe Sitemaps do
 
       expect(sitemap_fixture.entries).to eql(entries)
     end
+
+    xit "skips entries with a malformed or missing `loc`" do
+    end
   end
 
   context "sitemap_index" do
@@ -54,7 +57,7 @@ describe Sitemaps do
       expect(sitemap).not_to be_nil
     end
 
-    it "can present a list of entries, which expose priority, lastmod, etc." do
+    it "can present a list of entries" do
       SM = Sitemaps::Submap
       entries = [
         SM.new(URI.parse("http://www.example.com/sitemap1.xml.gz"), Time.parse("2004-10-01T18:23:17+00:00")),
@@ -66,30 +69,25 @@ describe Sitemaps do
   end
 
   context "fetching" do
-    it "can fetch an xml sitemap from a url, default options" do
-      pending
+    xit "can fetch an xml sitemap from a url, default options" do
       Sitemaps.fetch(url)
     end
 
-    it "can fetch an xml sitemap from a url, using a custom fetch proc" do
-      pending
+    xit "can fetch an xml sitemap from a url, using a custom fetch proc" do
       Sitemaps.fetch(url, fetch: custom_proc)
     end
 
-    it "can fetch a recursive sitemap (sitemap indexes, see sitemaps.org" do
-      pending
+    xit "can fetch a recursive sitemap (sitemap indexes, see sitemaps.org" do
       Sitemaps.fetch(url, recurse: true)
     end
   end
 
   context "discover" do
-    it "can find and fetch a sitemap from a domain" do
-      pending
+    xit "can find and fetch a sitemap from a domain" do
       Sitemaps.discover("http://example.com") #=> xml content
     end
 
-    it "returns nil if no sitemap could be found" do
-      pending
+    xit "returns nil if no sitemap could be found" do
       Sitemaps.discover("http://exampleno.com") #=> nil
     end
   end
