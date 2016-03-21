@@ -27,23 +27,19 @@ require 'sitemaps'
 Sitemaps.parse("<xml ns=\"...")
 
 # fetch and parse a sitemap from a known url
-Sitemaps.fetch("http://google.com/sitemap.xml", recurse: true, fetch: :builtin)
-
-# attempt to discover a sitemap url for a domain
-# parallel fetches a small set of 'normal' urls, returns whichever comes back first, most likely only one.
-xml = Sitemaps.discover("http://example.com")
-if url.present?
-  sitemap = Sitemaps.parse(xml)
-end
+sitemap = Sitemaps.fetch("http://google.com/sitemap.xml", recurse: true)
 
 # sitemap usage
-
 sitemap.entries.first #> Struct(loc: 'http://example.com/page', lastmod: DateTime.utc, changefreq: :monthly, priority: 0.5)
-
 urls = sitemap.entries.map(&:loc)
-```
 
 ## Development
+
+## TODO
+
+* discovery
+* sorting by last modified, or priority
+* filtering by last modified
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
