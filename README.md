@@ -1,5 +1,7 @@
 # Sitemaps
 
+[![Gem](https://img.shields.io/gem/v/sitemaps_parser.svg?style=flat-square)](https://rubygems.org/gems/sitemaps_parser)
+
 Discover, retrieve and parse XML sitemaps, according to the spec at [sitemaps.org](http://sitemaps.org).
 
 ## TODO
