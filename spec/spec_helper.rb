@@ -1,5 +1,17 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+
 require 'sitemaps'
+require 'webmock/rspec'
+require 'vcr'
+
+VCR.configure do |c|
+  c.cassette_library_dir = File.join(File.dirname(__FILE__), './fixtures/vcr')
+  c.hook_into :webmock
+  c.configure_rspec_metadata!
+end
+
+RSpec.configure do |c|
+end
 
 module SitemapFixtures
   def sitemap_file
