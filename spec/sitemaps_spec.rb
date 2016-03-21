@@ -1,28 +1,7 @@
 require 'spec_helper'
 
 describe Sitemaps do
-
-  def sitemap_file
-    @sitemap_file ||= begin
-      path = File.join(File.dirname(__FILE__), "./fixtures/sitemap.valid.xml")
-      File.read(path).freeze
-    end
-  end
-
-  def sitemap_fixture
-    @sitemap_fixture ||= Sitemaps.parse(sitemap_file)
-  end
-
-  def sitemap_index_file
-    @sitemap_file ||= begin
-      path = File.join(File.dirname(__FILE__), "./fixtures/sitemap_index.valid.xml")
-      File.read(path).freeze
-    end
-  end
-
-  def sitemap_index_fixture
-    @sitemap_index_fixture ||= Sitemaps.parse(sitemap_index_file)
-  end
+  include SitemapFixtures
 
   it 'has a version number' do
     expect(Sitemaps::VERSION).not_to be nil
@@ -47,7 +26,14 @@ describe Sitemaps do
       expect(sitemap_fixture.entries).to eql(entries)
     end
 
-    xit "skips entries with a malformed or missing `loc`" do
+    it "skips entries with a malformed or missing `loc`" do
+      SE = Sitemaps::Entry
+      entries = [
+        SE.new(URI.parse("http://www.example.com/"), Time.parse("2005-01-01"), :monthly, 0.8)
+      ]
+
+      # there are 3 entries defined in the file, but two have unparsable locations
+      expect(invalid_fixture.entries).to eql(entries)
     end
   end
 
