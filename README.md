@@ -2,6 +2,12 @@
 
 Discover, retrieve and parse XML sitemaps, according to the spec at [sitemaps.org](http://sitemaps.org).
 
+## TODO
+
+* discovery
+* sorting by last modified, or priority
+* filtering by last modified
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -32,14 +38,9 @@ sitemap = Sitemaps.fetch("http://google.com/sitemap.xml", recurse: true)
 # sitemap usage
 sitemap.entries.first #> Struct(loc: 'http://example.com/page', lastmod: DateTime.utc, changefreq: :monthly, priority: 0.5)
 urls = sitemap.entries.map(&:loc)
+```
 
 ## Development
-
-## TODO
-
-* discovery
-* sorting by last modified, or priority
-* filtering by last modified
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
