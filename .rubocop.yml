@@ -12,3 +12,6 @@ Style/StringLiterals:
 
 Style/RescueModifier:
   Enabled: false
+
+Lint/ShadowingOuterLocalVariable:
+  Enabled: false

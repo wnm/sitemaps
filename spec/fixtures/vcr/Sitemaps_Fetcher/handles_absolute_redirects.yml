@@ -1,0 +1,90 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://httpbin.org/absolute-redirect/1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+      Host:
+      - httpbin.org
+  response:
+    status:
+      code: 302
+      message: FOUND
+    headers:
+      Server:
+      - nginx
+      Date:
+      - Mon, 21 Mar 2016 21:49:27 GMT
+      Content-Type:
+      - text/html; charset=utf-8
+      Content-Length:
+      - '251'
+      Connection:
+      - keep-alive
+      Location:
+      - http://httpbin.org/get
+      Access-Control-Allow-Origin:
+      - "*"
+      Access-Control-Allow-Credentials:
+      - 'true'
+    body:
+      encoding: UTF-8
+      string: |-
+        <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+        <title>Redirecting...</title>
+        <h1>Redirecting...</h1>
+        <p>You should be redirected automatically to target URL: <a href="http://httpbin.org/get">http://httpbin.org/get</a>.  If not click the link.
+    http_version: 
+  recorded_at: Mon, 21 Mar 2016 21:49:20 GMT
+- request:
+    method: get
+    uri: http://httpbin.org/get
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+      Host:
+      - httpbin.org
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx
+      Date:
+      - Mon, 21 Mar 2016 21:49:27 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '246'
+      Connection:
+      - keep-alive
+      Access-Control-Allow-Origin:
+      - "*"
+      Access-Control-Allow-Credentials:
+      - 'true'
+    body:
+      encoding: UTF-8
+      string: "{\n  \"args\": {}, \n  \"headers\": {\n    \"Accept\": \"*/*\", \n
+        \   \"Accept-Encoding\": \"gzip;q=1.0,deflate;q=0.6,identity;q=0.3\", \n    \"Host\":
+        \"httpbin.org\", \n    \"User-Agent\": \"Ruby\"\n  }, \n  \"origin\": \"71.205.36.153\",
+        \n  \"url\": \"http://httpbin.org/get\"\n}\n"
+    http_version: 
+  recorded_at: Mon, 21 Mar 2016 21:49:21 GMT
+recorded_with: VCR 3.0.1

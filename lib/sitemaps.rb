@@ -1,23 +1,17 @@
+require "active_support/core_ext/object/blank"
+
 # Discover, fetch and parse XML sitemaps as defined by the `http://sitemaps.org` spec.
 module Sitemaps
   Entry   = Struct.new(:loc, :lastmod, :changefreq, :priority)
   Submap  = Struct.new(:loc, :lastmod)
   Sitemap = Struct.new(:entries, :sitemaps)
 
-  class FetchError < StandardError; end
-
-  @default_fetch = lambda do |uri|
-    resp = Net::HTTP.get_response(uri)
-    raise FetchError, "Failed to fetch URI, #{resp.code}" unless resp.code.to_s =~ /2\d\d/
-    resp.body
-  end
-
   def self.parse(source)
     Sitemaps::Parser.parse(source)
   end
 
   def self.fetch(url, fetch: nil, recurse: true)
-    fetch ||= @default_fetch
+    fetch ||= -> (url) { Sitemaps::Fetcher.fetch(url) }
     recurse ? fetch_recursive(url, fetch) : fetch_single(url, fetch)
   end
 
@@ -63,3 +57,4 @@ end
 
 require "sitemaps/version"
 require "sitemaps/parser"
+require "sitemaps/fetcher"
