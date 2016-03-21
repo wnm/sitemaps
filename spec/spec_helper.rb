@@ -13,6 +13,7 @@ end
 RSpec.configure do |c|
 end
 
+# helpers for accessing local file fixtures
 module SitemapFixtures
   def sitemap_file
     @sitemap_file ||= begin

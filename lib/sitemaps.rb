@@ -1,3 +1,4 @@
+# Discover, fetch and parse XML sitemaps as defined by the `http://sitemaps.org` spec.
 module Sitemaps
   Entry   = Struct.new(:loc, :lastmod, :changefreq, :priority)
   Submap  = Struct.new(:loc, :lastmod)
@@ -5,7 +6,7 @@ module Sitemaps
 
   class FetchError < StandardError; end
 
-  @default_fetch = -> (uri) do
+  @default_fetch = lambda do |uri|
     resp = Net::HTTP.get_response(uri)
     raise FetchError, "Failed to fetch URI, #{resp.code}" unless resp.code.to_s =~ /2\d\d/
     resp.body
@@ -20,19 +21,21 @@ module Sitemaps
     recurse ? fetch_recursive(url, fetch) : fetch_single(url, fetch)
   end
 
-private
-
   def self.fetch_single(url, fetch)
     source = fetch.call(parse_url(url))
     Sitemaps::Parser.parse(source)
   end
 
   def self.fetch_recursive(url, fetch)
-    queue, maps = [url], {}
+    queue = [url]
+    maps  = {}
+
+    # walk the queue, fetching the sitemap requested and adding
+    # new sitemaps to the queue as found
     loop do
       begin
         url = queue.pop
-        break if url.nil? 
+        break if url.nil?
         next  unless maps[url].nil?
 
         maps[url] = fetch_single(url, fetch)

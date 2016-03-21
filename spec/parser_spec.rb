@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'rexml/document'
 
 describe Sitemaps::Parser do
-
   def as_doc(str)
     REXML::Document.new(str).root
   end
@@ -93,5 +92,4 @@ describe Sitemaps::Parser do
 
     expect(lastmod).to eq(0.5)
   end
-
 end

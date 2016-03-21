@@ -1,4 +1,5 @@
 module Sitemaps
+  # Parse XML Sitemaps
   module Parser
     require "time"
     require "rexml/document"
@@ -27,23 +28,23 @@ module Sitemaps
     end
 
     def self.parse_loc(root)
-      loc  = root.get_text("loc").try(:value)
+      loc = root.get_text("loc").try(:value)
       loc && URI.parse(loc) rescue nil
     end
 
     def self.parse_lastmod(root)
-      mod  = root.get_text("lastmod").try(:value)
+      mod = root.get_text("lastmod").try(:value)
       mod && Time.parse(mod) rescue nil
     end
 
-    VALID_CHANGEFREQ = %w(always hourly daily weekly monthly yearly never)
+    VALID_CHANGEFREQ = %w(always hourly daily weekly monthly yearly never).freeze
     def self.parse_changefreq(root)
-      freq  = root.get_text("changefreq").try(:value)
+      freq = root.get_text("changefreq").try(:value)
       freq && VALID_CHANGEFREQ.include?(freq) ? freq.to_sym : nil
     end
 
     def self.parse_priority(root)
-      priority  = root.get_text("priority").try(:value) || "0.5"
+      priority = root.get_text("priority").try(:value) || "0.5"
       priority && Float(priority) rescue 0.5 # default priority according to spec
     end
   end

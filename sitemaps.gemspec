@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Jonathan Raphaelson"]
   spec.email         = ["jraphaelson@termscout.com"]
 
-  spec.summary       = %q{Retrieve and parse sitemaps, according to the sitemaps.org spec.}
+  spec.summary       = "Retrieve and parse sitemaps, according to the sitemaps.org spec."
   spec.homepage      = "http://github.com/termscout/sitemaps"
   spec.license       = "MIT"
 
