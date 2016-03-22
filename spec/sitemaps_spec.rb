@@ -88,7 +88,7 @@ describe Sitemaps do
       called = false
       fetch  = lambda do |uri|
         called = true
-        Net::HTTP.get(uri)
+        Sitemaps::Fetcher.fetch(uri)
       end
 
       sitemap = Sitemaps.fetch("http://www.termscout.com/category-sitemap.xml", fetch: fetch)
@@ -96,18 +96,27 @@ describe Sitemaps do
       expect(sitemap.entries).to match_array(category_entries)
     end
 
-    xit "can fetch a sitemap, and supports a max entry parameter" do
-      sitemap = Sitemaps.fetch("http://www.digitalocean.com/sitemap.xml.gz", max_entries: 50)
-      expect(sitemap.entries.length).to eq(50)
+    it "can fetch a sitemap, and supports a max entry parameter" do
+      sitemap = Sitemaps.fetch("http://www.digitalocean.com/sitemap.xml.gz", max_entries: 10)
+      expect(sitemap.entries.length).to eq(10)
     end
 
-    xit "can fetch a sitemap, and supports a filter block" do
+    it "can fetch a sitemap, and supports a filter block" do
       sitemap = Sitemaps.fetch("http://www.digitalocean.com/sitemap.xml.gz") do |entry|
-        entry.loc !~ /blog/
+        entry.loc.path !~ /blog/
       end
 
       expect(sitemap.entries.length).to be > 0
-      expect(sitemap.entries.any? { |e| e.loc =~ /blog/ }).to be_false
+      expect(sitemap.entries.any? { |e| e.loc.path =~ /blog/ }).to be false
+    end
+
+    it "can fetch a sitemap, and supports both a filter block and a max_entries parameter" do
+      sitemap = Sitemaps.fetch("http://www.digitalocean.com/sitemap.xml.gz", max_entries: 10) do |entry|
+        entry.loc.path !~ /blog/
+      end
+
+      expect(sitemap.entries.length).to eq(10)
+      expect(sitemap.entries.any? { |e| e.loc.path =~ /blog/ }).to be false
     end
 
     it "can fetch a sitemap index (sitemap indexes, see sitemaps.org)" do
@@ -128,12 +137,40 @@ describe Sitemaps do
       category_entries.each     { |e| expect(sitemap.entries).to include(e) }
       page_partial_entries.each { |e| expect(sitemap.entries).to include(e) }
     end
+
+    it "can fetch a sitemap index recursively with filters" do
+      sitemap = Sitemaps.fetch("http://www.termscout.com/sitemap_index.xml", recurse: true) do |entry|
+        entry.loc.path =~ /blog/i
+      end
+
+      # we fetched the index
+      expect(sitemap.sitemaps).to match_array(index_entries)
+
+      # we limited to 10 total entries
+      expect(sitemap.entries.length).to eq(2)
+      expect(sitemap.entries.first.loc.path).to eq("/blog/")
+    end
+
+    it "can fetch a sitemap index recursively with max_entries and filters" do
+      sitemap = Sitemaps.fetch("http://www.termscout.com/sitemap_index.xml", recurse: true, max_entries: 10) do |entry|
+        entry.loc.path !~ /category/i
+      end
+
+      # we fetched the index
+      expect(sitemap.sitemaps).to match_array(index_entries)
+
+      # we limited to 10 total entries
+      expect(sitemap.entries.length).to eq(10)
+
+      # and none are the category urls
+      category_entries.each { |e| expect(sitemap.entries).not_to include(e) }
+    end
   end
 
   # URL level discovery specs
   context "discover", vcr: { record: :new_episodes } do
     xit "can find and fetch a sitemap from a domain that's mentioned in a robots.txt" do
-      sitemap = Sitemaps.discover("http://www.digitalocean.com")
+      Sitemaps.discover("http://www.digitalocean.com")
     end
 
     xit "can find and fetch a sitemap from a domain" do

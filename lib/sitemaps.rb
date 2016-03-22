@@ -10,17 +10,17 @@ module Sitemaps
     Sitemaps::Parser.parse(source)
   end
 
-  def self.fetch(url, fetch: nil, recurse: true)
-    fetch ||= -> (url) { Sitemaps::Fetcher.fetch(url) }
-    recurse ? fetch_recursive(url, fetch) : fetch_single(url, fetch)
+  def self.fetch(url, fetch: nil, recurse: true, max_entries: nil, &block)
+    fetch ||= -> (u) { Sitemaps::Fetcher.fetch(u) }
+    recurse ? fetch_recursive(url, fetch, max_entries, &block) : fetch_single(url, fetch, max_entries, &block)
   end
 
-  def self.fetch_single(url, fetch)
+  def self.fetch_single(url, fetch, max_entries, &block)
     source = fetch.call(parse_url(url))
-    Sitemaps::Parser.parse(source)
+    Sitemaps::Parser.parse(source, max_entries: max_entries, filter: block)
   end
 
-  def self.fetch_recursive(url, fetch)
+  def self.fetch_recursive(url, fetch, max_entries, &block)
     queue = [url]
     maps  = {}
 
@@ -32,8 +32,15 @@ module Sitemaps
         break if url.nil?
         next  unless maps[url].nil?
 
-        maps[url] = fetch_single(url, fetch)
+        # fetch this item in the queue, and queue up any sub maps it found
+        maps[url] = fetch_single(url, fetch, max_entries, &block)
         queue.push(*maps[url].sitemaps.map(&:loc))
+
+        # decrement max_entries (since it's max_entries total, not per map)
+        unless max_entries.nil?
+          max_entries -= maps[url].entries.length
+          break if max_entries <= 0
+        end
       rescue => ex
         $stderr.puts "ERROR FETCHING: #{url}, #{ex.message}, ignoring..."
         next

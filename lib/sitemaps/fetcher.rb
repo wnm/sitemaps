@@ -20,7 +20,7 @@ module Sitemaps
             return resp.body
           end
 
-          # on a 3xx response, handle the redirect
+        # on a 3xx response, handle the redirect
         elsif resp.code.to_s =~ /3\d\d/
           location = URI.parse(resp.header['location'])
           location = uri + resp.header['location'] if location.relative?
@@ -29,14 +29,14 @@ module Sitemaps
           attempts += 1
           next
 
-          # otherwise (4xx, 5xx) throw an exception
+        # otherwise (4xx, 5xx) throw an exception
         else
-          fail FetchError, "Failed to fetch URI, #{uri}, failed with response code: #{resp.code}"
+          raise FetchError, "Failed to fetch URI, #{uri}, failed with response code: #{resp.code}"
         end
       end
 
       # if we got here, we ran out of attempts
-      fail MaxRedirectError, "Failed to fetch URI #{uri}, redirected too many times" if attempts >= @max_attempts
+      raise MaxRedirectError, "Failed to fetch URI #{uri}, redirected too many times" if attempts >= @max_attempts
     end
   end
 end

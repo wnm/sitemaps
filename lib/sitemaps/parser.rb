@@ -6,7 +6,7 @@ module Sitemaps
     require "active_support"
     require "active_support/core_ext/object/try"
 
-    def self.parse(source)
+    def self.parse(source, max_entries: nil, filter: nil)
       document = REXML::Document.new(source)
       entries  = document.elements.to_a("/urlset/url").map do |root|
         loc  = parse_loc(root) || next
@@ -14,8 +14,10 @@ module Sitemaps
         freq = parse_changefreq(root)
         pri  = parse_priority(root)
 
-        Sitemaps::Entry.new(loc, mod, freq, pri)
+        entry = Sitemaps::Entry.new(loc, mod, freq, pri)
+        (!filter || filter.call(entry)) ? entry : nil
       end.reject(&:nil?)
+      entries = entries.take(max_entries) unless max_entries.nil?
 
       sitemaps = document.elements.to_a("/sitemapindex/sitemap").map do |root|
         loc  = parse_loc(root) || next
