@@ -15,7 +15,7 @@ Discover, retrieve and parse XML sitemaps, according to the spec at [sitemaps.or
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'sitemaps_parser'
+gem 'sitemaps_parser', require: 'sitemaps'
 ```
 
 And then execute:
@@ -29,7 +29,7 @@ Or install it yourself as:
 ## Usage
 
 ```ruby
-require 'sitemaps_parser'
+require 'sitemaps'
 
 # parse a sitemap from a string
 Sitemaps.parse("<xml ns=\"...")
