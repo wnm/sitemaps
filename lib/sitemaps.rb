@@ -21,16 +21,20 @@ module Sitemaps
 
   def self.fetch(url, fetch: nil, recurse: true, max_entries: nil, &block)
     fetch ||= -> (u) { Sitemaps::Fetcher.fetch(u) }
+    url     = parse_url(url)
+
     recurse ? fetch_recursive(url, fetch, max_entries, &block) : fetch_single(url, fetch, max_entries, &block)
   end
 
   def self.fetch_single(url, fetch, max_entries, &block)
-    source = fetch.call(parse_url(url))
+    url    = parse_url(url)
+    source = fetch.call(url)
+
     Sitemaps::Parser.parse(source, max_entries: max_entries, filter: block)
   end
 
   def self.fetch_recursive(url, fetch, max_entries, &block)
-    queue = [url]
+    queue = [parse_url(url)]
     maps  = {}
 
     # walk the queue, fetching the sitemap requested and adding
@@ -66,7 +70,7 @@ module Sitemaps
   def self.parse_url(url)
     return url if url.is_a? URI
 
-    url = "http://#{url}" unless url =~ /^https?/
+    url = "http://#{url}" unless url =~ %r{^https?://}
     URI.parse(url)
   end
 end

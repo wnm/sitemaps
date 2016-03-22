@@ -79,6 +79,16 @@ describe Sitemaps do
        SM.new(URI.parse("http://www.termscout.com/category-sitemap.xml"), Time.parse("2015-05-01T09:13:11-06:00"))]
     end
 
+    it "throws an exception when the incoming url is invalid" do
+      expect do
+        Sitemaps.fetch("blah blah blah")
+      end.to raise_error URI::InvalidURIError
+
+      expect do
+        Sitemaps.fetch("blah blah blah", recurse: false)
+      end.to raise_error URI::InvalidURIError
+    end
+
     it "can fetch an xml sitemap from a url, using default options" do
       sitemap = Sitemaps.fetch("http://www.termscout.com/category-sitemap.xml")
       expect(sitemap.entries).to match_array(category_entries)
