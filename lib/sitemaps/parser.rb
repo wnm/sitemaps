@@ -1,11 +1,6 @@
 module Sitemaps
   # Parse XML Sitemaps
   module Parser
-    require "time"
-    require "rexml/document"
-    require "active_support"
-    require "active_support/core_ext/object/try"
-
     def self.parse(source, max_entries: nil, filter: nil)
       document = REXML::Document.new(source)
       entries  = document.elements.to_a("/urlset/url").map do |root|

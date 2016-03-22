@@ -1,4 +1,13 @@
+require "active_support"
+require "active_support/core_ext/object/try"
 require "active_support/core_ext/object/blank"
+
+require "time"
+require "rexml/document"
+
+require "sitemaps/version"
+require "sitemaps/parser"
+require "sitemaps/fetcher"
 
 # Discover, fetch and parse XML sitemaps as defined by the `http://sitemaps.org` spec.
 module Sitemaps
@@ -61,7 +70,3 @@ module Sitemaps
     URI.parse(url)
   end
 end
-
-require "sitemaps/version"
-require "sitemaps/parser"
-require "sitemaps/fetcher"
