@@ -37,6 +37,11 @@ Sitemaps.parse("<xml ns=\"...")
 # fetch and parse a sitemap from a known url
 sitemap = Sitemaps.fetch("http://google.com/sitemap.xml", recurse: true)
 
+# fetch and parse sitemaps, excluding paths matching a filter, and limiting to the top 200 
+sitemap = Sitemaps.fetch("https://www.digitalocean.com/sitemaps.xml.gz", max_entries: 200) do |entry|
+  entry.loc.path !~ /blog/i
+end
+
 # sitemap usage
 sitemap.entries.first #> Struct(loc: 'http://example.com/page', lastmod: DateTime.utc, changefreq: :monthly, priority: 0.5)
 urls = sitemap.entries.map(&:loc)
