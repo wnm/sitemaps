@@ -83,10 +83,6 @@ describe Sitemaps do
       expect do
         Sitemaps.fetch("blah blah blah")
       end.to raise_error URI::InvalidURIError
-
-      expect do
-        Sitemaps.fetch("blah blah blah", recurse: false)
-      end.to raise_error URI::InvalidURIError
     end
 
     it "can fetch an xml sitemap from a url, using default options" do
@@ -101,7 +97,7 @@ describe Sitemaps do
         Sitemaps::Fetcher.fetch(uri)
       end
 
-      sitemap = Sitemaps.fetch("http://www.termscout.com/category-sitemap.xml", fetch: fetch)
+      sitemap = Sitemaps.fetch("http://www.termscout.com/category-sitemap.xml", fetcher: fetch)
       expect(called).to be(true)
       expect(sitemap.entries).to match_array(category_entries)
     end
@@ -129,16 +125,8 @@ describe Sitemaps do
       expect(sitemap.entries.any? { |e| e.loc.path =~ /blog/ }).to be false
     end
 
-    it "can fetch a sitemap index (sitemap indexes, see sitemaps.org)" do
-      sitemap = Sitemaps.fetch("http://www.termscout.com/sitemap_index.xml", recurse: false)
-
-      # we fetched the index
-      expect(sitemap.sitemaps).to match_array(index_entries)
-      expect(sitemap.entries).to be_empty
-    end
-
     it "can fetch a sitemap index recursively" do
-      sitemap = Sitemaps.fetch("http://www.termscout.com/sitemap_index.xml", recurse: true)
+      sitemap = Sitemaps.fetch("http://www.termscout.com/sitemap_index.xml")
 
       # we fetched the index
       expect(sitemap.sitemaps).to match_array(index_entries)
@@ -149,7 +137,7 @@ describe Sitemaps do
     end
 
     it "can fetch a sitemap index recursively with filters" do
-      sitemap = Sitemaps.fetch("http://www.termscout.com/sitemap_index.xml", recurse: true) do |entry|
+      sitemap = Sitemaps.fetch("http://www.termscout.com/sitemap_index.xml") do |entry|
         entry.loc.path =~ /blog/i
       end
 
@@ -157,12 +145,12 @@ describe Sitemaps do
       expect(sitemap.sitemaps).to match_array(index_entries)
 
       # we limited to 10 total entries
-      expect(sitemap.entries.length).to eq(2)
+      expect(sitemap.entries.length).to eq(1)
       expect(sitemap.entries.first.loc.path).to eq("/blog/")
     end
 
     it "can fetch a sitemap index recursively with max_entries and filters" do
-      sitemap = Sitemaps.fetch("http://www.termscout.com/sitemap_index.xml", recurse: true, max_entries: 10) do |entry|
+      sitemap = Sitemaps.fetch("http://www.termscout.com/sitemap_index.xml", max_entries: 10) do |entry|
         entry.loc.path !~ /category/i
       end
 
@@ -180,7 +168,7 @@ describe Sitemaps do
   # URL level discovery specs
   context "discover", vcr: { record: :new_episodes } do
     xit "can find and fetch a sitemap from a domain that's mentioned in a robots.txt" do
-      Sitemaps.discover("http://www.digitalocean.com")
+      sitemap = Sitemaps.discover("http://www.digitalocean.com", max_entries: 100)
     end
 
     xit "can find and fetch a sitemap from a domain" do

@@ -35,7 +35,7 @@ require 'sitemaps'
 Sitemaps.parse("<xml ns=\"...")
 
 # fetch and parse a sitemap from a known url
-sitemap = Sitemaps.fetch("http://google.com/sitemap.xml", recurse: true)
+sitemap = Sitemaps.fetch("http://google.com/sitemap.xml")
 
 # fetch and parse sitemaps, excluding paths matching a filter, and limiting to the top 200 
 sitemap = Sitemaps.fetch("https://www.digitalocean.com/sitemaps.xml.gz", max_entries: 200) do |entry|

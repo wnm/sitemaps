@@ -12,6 +12,7 @@ module Sitemaps
         entry = Sitemaps::Entry.new(loc, mod, freq, pri)
         (!filter || filter.call(entry)) ? entry : nil
       end.reject(&:nil?)
+      entries = entries.uniq(&:loc)
       entries = entries.take(max_entries) unless max_entries.nil?
 
       sitemaps = document.elements.to_a("/sitemapindex/sitemap").map do |root|

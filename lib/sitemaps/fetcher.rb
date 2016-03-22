@@ -9,6 +9,12 @@ module Sitemaps
     def self.fetch(uri)
       attempts = 0
 
+      # we only work on URI objects
+      unless uri.is_a? URI
+        uri = "http://#{uri}" unless uri =~ %r{^https?://}
+        uri = URI.parse(uri)
+      end
+
       until attempts >= @max_attempts
         resp = Net::HTTP.get_response(uri)
 
