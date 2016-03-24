@@ -43,17 +43,19 @@ module Sitemaps
     _instance.fetch_recursive(roots, fetcher, max_entries, &block)
   end
 
-  # PRIVATE
+  # @return [Instance]
+  # @private
+  # @api private
   def self._instance
     @instance ||= Sitemaps::Instance.new
   end
 
+  # Holder for methods that shouldn't be exposed as public API
+  # @private
+  # @api private
   class Instance
-    def fetch_single(url, fetcher, max_entries, &block)
-      source = fetcher.call(url)
-      Sitemaps::Parser.parse(source, max_entries: max_entries, filter: block)
-    end
-
+    # recursively fetch sitemaps and sitemap indexes from the given urls.
+    # @return [Sitemap]
     def fetch_recursive(urls, fetcher, max_entries, &block)
       queue = urls.is_a?(Array) ? urls : [urls]
       maps  = {}
@@ -65,10 +67,14 @@ module Sitemaps
           url = queue.pop
           break if url.nil?
           next  unless maps[url].nil?
-          
+
           # fetch this item in the queue, and queue up any sub maps it found
-          maps[url] = fetch_single(url, fetcher, max_entries, &block)
-          queue.push(*maps[url].sitemaps.map(&:loc))
+          source  = fetcher.call(url)
+          sitemap = Sitemaps::Parser.parse(source, max_entries: max_entries, filter: block)
+
+          # save the results and queue up any submaps it found
+          maps[url] = sitemap
+          queue.push(*sitemap.sitemaps.map(&:loc))
 
           # decrement max_entries (since it's max_entries total, not per map)
           unless max_entries.nil?
@@ -83,39 +89,35 @@ module Sitemaps
       end
 
       # collapse the recovered maps into a single one with everything
-      result = maps.each_with_object(Sitemap.new([], [])) do |(_, map), result|
-        result.sitemaps.concat(map.sitemaps)
-        result.entries.concat(map.entries)
+      maps.each_with_object(Sitemap.new([], [])) do |(_, map), result|
+        result.sitemaps.concat(map.sitemaps).uniq! { |e| e.loc.to_s }
+        result.entries.concat(map.entries).uniq!   { |e| e.loc.to_s }
       end
-
-      result.sitemaps.uniq! { |e| e.loc.to_s }
-      result.entries.uniq!  { |e| e.loc.to_s }
-      result
     end
 
+    # interrogate a host for sitemaps from robots.txt, or return some potential locations.
+    # @return [Array<URI>]
     def discover_roots(url, fetcher)
-      # try to fetch a robots.txt, and get sitemaps from there
       robots = begin
         robotsurl      = url.clone
         robotsurl.path = "/robots.txt"
         robotstxt      = fetcher.call(robotsurl)
 
-        robotstxt.scan(/^Sitemap: (.+)$/).flatten
+        discovered = robotstxt.scan(/^Sitemap: (.+)$/).flatten.reverse.map { |u| URI.parse(u) }
+        discovered.empty? ? nil : discovered
       rescue
-        []
+        nil
       end
 
       # try for files in a handful of known locations
       known_locations = %w(/sitemap_index.xml.gz /sitemap_index.xml /sitemap.xml.gz /sitemap.xml)
-      known_locations = known_locations.map do |path|
+      known_locations = known_locations.lazy.map do |path|
         pathurl      = url.clone
         pathurl.path = path
         pathurl
       end
 
-      # return a deduplicated array
-      roots = Set.new | robots | known_locations
-      roots.to_a
+      robots || known_locations.to_a
     end
   end
 end
