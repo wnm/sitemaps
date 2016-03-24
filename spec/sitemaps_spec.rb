@@ -167,16 +167,9 @@ describe Sitemaps do
 
   # URL level discovery specs
   context "discover", vcr: { record: :new_episodes } do
-    xit "can find and fetch a sitemap from a domain that's mentioned in a robots.txt" do
-      sitemap = Sitemaps.discover("http://www.digitalocean.com", max_entries: 100)
-    end
-
-    xit "can find and fetch a sitemap from a domain" do
-      Sitemaps.discover("http://example.com") #=> xml content
-    end
-
-    xit "returns nil if no sitemap could be found" do
-      Sitemaps.discover("http://exampleno.com") #=> nil
+    it "can find and fetch a sitemap from a domain that's mentioned in a robots.txt" do
+      sitemap = Sitemaps.discover("http://www.digitalocean.com", max_entries: 10)
+      expect(sitemap.entries.length).to eq(10)
     end
   end
 end
