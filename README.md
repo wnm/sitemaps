@@ -4,11 +4,7 @@
 
 Discover, retrieve and parse XML sitemaps, according to the spec at [sitemaps.org](http://sitemaps.org).
 
-## TODO
-
-* discovery
-* sorting by last modified, or priority
-* filtering by last modified
+See [RDOC Documentation](http://lygaret.github.io/sitemaps) for detailed documentation.
 
 ## Installation
 
@@ -35,15 +31,20 @@ require 'sitemaps'
 Sitemaps.parse("<xml ns=\"...")
 
 # fetch and parse a sitemap from a known url
-sitemap = Sitemaps.fetch("http://google.com/sitemap.xml")
+sitemap = Sitemaps.fetch("http://termscout.com/sitemap.xml")
 
 # fetch and parse sitemaps, excluding paths matching a filter, and limiting to the top 200 
 sitemap = Sitemaps.fetch("https://www.digitalocean.com/sitemaps.xml.gz", max_entries: 200) do |entry|
   entry.loc.path !~ /blog/i
 end
 
+# attempt to discover sitemaps for a site without a known sitemap location. Checks robots.txt and some common locations.
+sitemap = Sitemaps.discover("https://www.digitalocean.com", max_entries: 200) do |entry|
+  entry.loc.path !~ /blog/i
+end
+
 # sitemap usage
-sitemap.entries.first #> Struct(loc: 'http://example.com/page', lastmod: DateTime.utc, changefreq: :monthly, priority: 0.5)
+sitemap.entries.first #> Sitemaps::Entry(loc: 'http://example.com/page', lastmod: DateTime.utc, changefreq: :monthly, priority: 0.5)
 urls = sitemap.entries.map(&:loc)
 ```
 
