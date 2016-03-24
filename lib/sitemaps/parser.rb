@@ -1,6 +1,16 @@
 module Sitemaps
   # Parse XML Sitemaps
   module Parser
+    VALID_CHANGEFREQ = %w(always hourly daily weekly monthly yearly never).freeze
+
+    # Given a source string, returns a sitemap containing all valid url entries, or all valid sub-sitemaps.
+    # See `http://sitemaps.org` for information on the spec.
+    #
+    # @param source [String] an XML string to parse.
+    # @param max_entries [Integer, nil] the maximum number of entries to add to the sitemap.
+    # @param filter [#call, nil] if provided, called per entry to filter the entry out of the sitemap.
+    # @return [Sitemap] the sitemap parsed from the XML string. If the XML string given is invalid,
+    #   a sitemap will still be returned, but the entries and sitemaps keys will be empty.
     def self.parse(source, max_entries: nil, filter: nil)
       document = REXML::Document.new(source)
       entries  = document.elements.to_a("/urlset/url").map do |root|
@@ -25,22 +35,29 @@ module Sitemaps
       Sitemaps::Sitemap.new(entries, sitemaps)
     end
 
+    # @api private
+    # @private
     def self.parse_loc(root)
       loc = root.get_text("loc").try(:value)
       loc && URI.parse(loc) rescue nil
     end
 
+    # @api private
+    # @private
     def self.parse_lastmod(root)
       mod = root.get_text("lastmod").try(:value)
       mod && Time.parse(mod) rescue nil
     end
 
-    VALID_CHANGEFREQ = %w(always hourly daily weekly monthly yearly never).freeze
+    # @api private
+    # @private
     def self.parse_changefreq(root)
       freq = root.get_text("changefreq").try(:value)
       freq && VALID_CHANGEFREQ.include?(freq) ? freq.to_sym : nil
     end
 
+    # @api private
+    # @private
     def self.parse_priority(root)
       priority = root.get_text("priority").try(:value) || "0.5"
       priority && Float(priority) rescue 0.5 # default priority according to spec

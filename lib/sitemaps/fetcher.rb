@@ -1,11 +1,20 @@
 module Sitemaps
-  # Simple single purpose HTTP client
+  # Simple single purpose HTTP client. Uses `Net::HTTP` directly, so as to not incur dependencies.
   module Fetcher
-    class FetchError < StandardError; end
+    class FetchError       < StandardError; end
     class MaxRedirectError < StandardError; end
 
     @max_attempts = 10
 
+    # Fetch the given URI.
+    #
+    # Handles redirects (up to 10 times), and additionally will inflate a body delivered without
+    # a content-encoding header, but with a `.gz` as the end of the path.
+    #
+    # @param uri [String, URI] the URI to fetch.
+    # @return [String]
+    # @raise [FetchError] if the server responds with an HTTP status that's not 2xx.
+    # @raise [MaxRedirectError] if more than 10 redirects have occurred while attempting to fetch the resource.
     def self.fetch(uri)
       attempts = 0
 

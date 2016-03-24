@@ -12,16 +12,55 @@ require "sitemaps/fetcher"
 
 # Discover, fetch and parse XML sitemaps as defined by the `http://sitemaps.org` spec.
 module Sitemaps
+
+  # @attr loc [URI] the location referred to by this entry. Will never be `nil`.
+  # @attr lastmod [Time, nil] the last modification time of this entry, or `nil` if unspecified.
+  # @attr changefreq [:always, :hourly, :daily, :weekly, :monthly, :yearly, :never, nil]
+  #   the change frequency of this entry, or nil if unspecified.
+  # @attr priority [Float] the priority of this entry, a float from 0 to 1. 0.5 if unspecified.
   Entry   = Struct.new(:loc, :lastmod, :changefreq, :priority)
+
+  # @attr loc [URI] the location referred to by this entry. Will never be `nil`.
+  # @attr lastmod [Time, nil] the last modification time of this entry, or `nil` if unspecified.
   Submap  = Struct.new(:loc, :lastmod)
+
+  # @attr entries [Enumerable<Entry>] A set of entries that were parsed out of one or more sitemaps, recursively.
+  # @attr sitemaps [Enumerable<Sitemap>] A set of sitemaps that were found in a sitemap index.
   Sitemap = Struct.new(:entries, :sitemaps)
 
   @default_fetcher = ->(u) { Sitemaps::Fetcher.fetch(u) }
 
+  # Parse a sitemap from an XML string. Does not fail on invalid documents, but doesn't include
+  # invalid entries in the final set. As such, a non-XML file, or non-sitemap XML file will return
+  # an empty sitemap.
+  #
+  # @param source [String] an XML string to parse as a sitemap.
+  # @return [Sitemap] the sitemap represented by the given XML string.
   def self.parse(source)
     Sitemaps::Parser.parse(source)
   end
 
+  # Fetch and parse a sitemap from the given URL.
+  #
+  # @overload fetch(url, fetcher: nil, max_entries: nil)
+  #   @param url [String, URI] the url of the sitemap in question.
+  #   @param fetcher [#call] given a URI, fetch an HTTP document. Defaults to using `Fetcher`.
+  #   @param max_entries [Integer] the maximum number of entries to include in the sitemap. Once the
+  #     sitemap has this many entries, further fetches and parsing will not occur. This is always
+  #     a good idea to include, as many sites have _very_ large sitemaps.
+  #   @return [Sitemap]
+  #
+  # @overload fetch(url, fetcher: nil, max_entries: nil)
+  #   If a block is given, it's used as a filter for entries before they're added to the sitemap.
+  #
+  #   @param url [String, URI] the url of the sitemap in question.
+  #   @param fetcher [#call] given a URI, fetch an HTTP document. Defaults to using `Fetcher`.
+  #   @param max_entries [Integer] the maximum number of entries to include in the sitemap. Once the
+  #     sitemap has this many entries, further fetches and parsing will not occur. This is always
+  #     a good idea to include, as many sites have _very_ large sitemaps.
+  #   @return [Sitemap]
+  #   @yield [Entry] Filters the entry from the sitemap if the block returns falsey.
+  #   @yieldreturn [Boolean] whether or not to include the entry in the sitemap.
   def self.fetch(url, fetcher: nil, max_entries: nil, &block)
     fetcher ||= @default_fetcher
     unless url.is_a? URI
@@ -32,6 +71,31 @@ module Sitemaps
     _instance.fetch_recursive(url, fetcher, max_entries, &block)
   end
 
+  # Discover, fetch and parse sitemaps from the given host.
+  #
+  # Attempts to find and fetch sitemaps at a given host, by examining the `robots.txt` at that
+  # host, or if no sitemaps are found via `robots.txt`, checking a small number of common locations,
+  # including `sitemap.xml`, `sitemap_index.xml`, and the gzip versions of those same locations.
+  #
+  # @overload discover(host, fetcher: nil, max_entries: nil)
+  #   @param host [String, URI] the url of the host to interrogate for sitemaps.
+  #   @param fetcher [#call] given a URI, fetch an HTTP document. Defaults to using `Fetcher`.
+  #   @param max_entries [Integer] the maximum number of entries to include in the sitemap. Once the
+  #     sitemap has this many entries, further fetches and parsing will not occur. This is always
+  #     a good idea to include, as many sites have _very_ large sitemaps.
+  #   @return [Sitemap]
+  #
+  # @overload discover(host, fetcher: nil, max_entries: nil)
+  #   If a block is given, it's used as a filter for entries before they're added to the sitemap.
+  #
+  #   @param host [String, URI] the url of the host to interrogate for sitemaps.
+  #   @param fetcher [#call] given a URI, fetch an HTTP document. Defaults to using `Fetcher`.
+  #   @param max_entries [Integer] the maximum number of entries to include in the sitemap. Once the
+  #     sitemap has this many entries, further fetches and parsing will not occur. This is always
+  #     a good idea to include, as many sites have _very_ large sitemaps.
+  #   @return [Sitemap]
+  #   @yield [Entry] Filters the entry from the sitemap if the block returns falsey.
+  #   @yieldreturn [Boolean] whether or not to include the entry in the sitemap.
   def self.discover(url, fetcher: nil, max_entries: nil, &block)
     fetcher ||= @default_fetcher
     unless url.is_a? URI
