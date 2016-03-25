@@ -9,9 +9,10 @@ module Sitemaps
     # @param source [String] an XML string to parse.
     # @param max_entries [Integer, nil] the maximum number of entries to add to the sitemap.
     # @param filter [#call, nil] if provided, called per entry to filter the entry out of the sitemap.
+    # @param filter_indexes [Boolean, nil] if truthy, filter is called per submap as well as entries.
     # @return [Sitemap] the sitemap parsed from the XML string. If the XML string given is invalid,
     #   a sitemap will still be returned, but the entries and sitemaps keys will be empty.
-    def self.parse(source, max_entries: nil, filter: nil)
+    def self.parse(source, max_entries: nil, filter: nil, filter_indexes: nil)
       document = REXML::Document.new(source)
       entries  = document.elements.to_a("/urlset/url").map do |root|
         loc  = parse_loc(root) || next
@@ -29,7 +30,8 @@ module Sitemaps
         loc  = parse_loc(root) || next
         mod  = parse_lastmod(root)
 
-        Sitemaps::Submap.new(loc, mod)
+        submap = Sitemaps::Submap.new(loc, mod)
+        (!filter || !filter_indexes || filter.call(submap)) ? submap : nil
       end.reject(&:nil?)
 
       Sitemaps::Sitemap.new(entries, sitemaps)

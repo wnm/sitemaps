@@ -50,7 +50,7 @@ module Sitemaps
   #     a good idea to include, as many sites have _very_ large sitemaps.
   #   @return [Sitemap]
   #
-  # @overload fetch(url, fetcher: nil, max_entries: nil)
+  # @overload fetch(url, fetcher: nil, filter_indexes: nil, max_entries: nil)
   #   If a block is given, it's used as a filter for entries before they're added to the sitemap.
   #
   #   @param url [String, URI] the url of the sitemap in question.
@@ -58,17 +58,19 @@ module Sitemaps
   #   @param max_entries [Integer] the maximum number of entries to include in the sitemap. Once the
   #     sitemap has this many entries, further fetches and parsing will not occur. This is always
   #     a good idea to include, as many sites have _very_ large sitemaps.
+  #   @param filter_indexes [Boolean] if true, Submap instances will be run through the filter block
+  #     as well as Entry instances.
   #   @return [Sitemap]
   #   @yield [Entry] Filters the entry from the sitemap if the block returns falsey.
   #   @yieldreturn [Boolean] whether or not to include the entry in the sitemap.
-  def self.fetch(url, fetcher: nil, max_entries: nil, &block)
+  def self.fetch(url, fetcher: nil, max_entries: nil, filter_indexes: nil, &block)
     fetcher ||= @default_fetcher
     unless url.is_a? URI
       url = "http://#{url}" unless url =~ %r{^https?://}
       url = URI.parse(url)
     end
 
-    _instance.fetch_recursive(url, fetcher, max_entries, &block)
+    _instance.fetch_recursive(url, fetcher, max_entries, filter_indexes, &block)
   end
 
   # Discover, fetch and parse sitemaps from the given host.
@@ -93,10 +95,12 @@ module Sitemaps
   #   @param max_entries [Integer] the maximum number of entries to include in the sitemap. Once the
   #     sitemap has this many entries, further fetches and parsing will not occur. This is always
   #     a good idea to include, as many sites have _very_ large sitemaps.
+  #   @param filter_indexes [Boolean] if true, Submap instances will be run through the filter block
+  #     as well as Entry instances.
   #   @return [Sitemap]
   #   @yield [Entry] Filters the entry from the sitemap if the block returns falsey.
   #   @yieldreturn [Boolean] whether or not to include the entry in the sitemap.
-  def self.discover(url, fetcher: nil, max_entries: nil, &block)
+  def self.discover(url, fetcher: nil, max_entries: nil, filter_indexes: nil, &block)
     fetcher ||= @default_fetcher
     unless url.is_a? URI
       url = "http://#{url}" unless url =~ %r{^https?://}
@@ -104,7 +108,7 @@ module Sitemaps
     end
 
     roots = _instance.discover_roots(url, fetcher)
-    _instance.fetch_recursive(roots, fetcher, max_entries, &block)
+    _instance.fetch_recursive(roots, fetcher, max_entries, filter_indexes, &block)
   end
 
   # @return [Instance]
@@ -120,7 +124,7 @@ module Sitemaps
   class Instance
     # recursively fetch sitemaps and sitemap indexes from the given urls.
     # @return [Sitemap]
-    def fetch_recursive(urls, fetcher, max_entries, &block)
+    def fetch_recursive(urls, fetcher, max_entries, filter_indexes, &block)
       queue = urls.is_a?(Array) ? urls : [urls]
       maps  = {}
 
@@ -134,7 +138,7 @@ module Sitemaps
 
           # fetch this item in the queue, and queue up any sub maps it found
           source  = fetcher.call(url)
-          sitemap = Sitemaps::Parser.parse(source, max_entries: max_entries, filter: block)
+          sitemap = Sitemaps::Parser.parse(source, max_entries: max_entries, filter: block, filter_indexes: filter_indexes)
 
           # save the results and queue up any submaps it found
           maps[url] = sitemap
