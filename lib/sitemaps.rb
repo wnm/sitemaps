@@ -171,7 +171,7 @@ module Sitemaps
         robotsurl.path = "/robots.txt"
         robotstxt      = fetcher.call(robotsurl)
 
-        discovered = robotstxt.scan(/^Sitemap: (.+)$/).flatten.reverse.map { |u| URI.parse(u) }
+        discovered = robotstxt.scan(/^Sitemap: (.+)$/).flatten.reverse.map { |u| URI.parse(u.strip) }
         discovered.empty? ? nil : discovered
       rescue
         nil
