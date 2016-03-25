@@ -157,7 +157,7 @@ locations.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#fetch_recursive-instance_method" title="#fetch_recursive (instance method)">- (Sitemap) <strong>fetch_recursive</strong>(urls, fetcher, max_entries, &amp;block) </a>
+      <a href="#fetch_recursive-instance_method" title="#fetch_recursive (instance method)">- (Sitemap) <strong>fetch_recursive</strong>(urls, fetcher, max_entries, filter_indexes, &amp;block) </a>
     
 
     
@@ -231,10 +231,6 @@ locations.</p>
       <pre class="lines">
 
 
-164
-165
-166
-167
 168
 169
 170
@@ -252,10 +248,14 @@ locations.</p>
 182
 183
 184
-185</pre>
+185
+186
+187
+188
+189</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/sitemaps.rb', line 164</span>
+      <pre class="code"><span class="info file"># File 'lib/sitemaps.rb', line 168</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_discover_roots'>discover_roots</span><span class='lparen'>(</span><span class='id identifier rubyid_url'>url</span><span class='comma'>,</span> <span class='id identifier rubyid_fetcher'>fetcher</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_robots'>robots</span> <span class='op'>=</span> <span class='kw'>begin</span>
@@ -287,7 +287,7 @@ locations.</p>
       <div class="method_details ">
   <h3 class="signature " id="fetch_recursive-instance_method">
   
-    - (<tt><span class='object_link'><a href="Sitemap.html" title="Sitemaps::Sitemap (class)">Sitemap</a></span></tt>) <strong>fetch_recursive</strong>(urls, fetcher, max_entries, &amp;block) 
+    - (<tt><span class='object_link'><a href="Sitemap.html" title="Sitemaps::Sitemap (class)">Sitemap</a></span></tt>) <strong>fetch_recursive</strong>(urls, fetcher, max_entries, filter_indexes, &amp;block) 
   
 
   
@@ -327,10 +327,6 @@ locations.</p>
       <pre class="lines">
 
 
-123
-124
-125
-126
 127
 128
 129
@@ -364,12 +360,16 @@ locations.</p>
 157
 158
 159
-160</pre>
+160
+161
+162
+163
+164</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/sitemaps.rb', line 123</span>
+      <pre class="code"><span class="info file"># File 'lib/sitemaps.rb', line 127</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_fetch_recursive'>fetch_recursive</span><span class='lparen'>(</span><span class='id identifier rubyid_urls'>urls</span><span class='comma'>,</span> <span class='id identifier rubyid_fetcher'>fetcher</span><span class='comma'>,</span> <span class='id identifier rubyid_max_entries'>max_entries</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_fetch_recursive'>fetch_recursive</span><span class='lparen'>(</span><span class='id identifier rubyid_urls'>urls</span><span class='comma'>,</span> <span class='id identifier rubyid_fetcher'>fetcher</span><span class='comma'>,</span> <span class='id identifier rubyid_max_entries'>max_entries</span><span class='comma'>,</span> <span class='id identifier rubyid_filter_indexes'>filter_indexes</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_queue'>queue</span> <span class='op'>=</span> <span class='id identifier rubyid_urls'>urls</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Array</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='id identifier rubyid_urls'>urls</span> <span class='op'>:</span> <span class='lbracket'>[</span><span class='id identifier rubyid_urls'>urls</span><span class='rbracket'>]</span>
   <span class='id identifier rubyid_maps'>maps</span>  <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
 
@@ -383,7 +383,7 @@ locations.</p>
 
       <span class='comment'># fetch this item in the queue, and queue up any sub maps it found
 </span>      <span class='id identifier rubyid_source'>source</span>  <span class='op'>=</span> <span class='id identifier rubyid_fetcher'>fetcher</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='id identifier rubyid_url'>url</span><span class='rparen'>)</span>
-      <span class='id identifier rubyid_sitemap'>sitemap</span> <span class='op'>=</span> <span class='const'>Sitemaps</span><span class='op'>::</span><span class='const'>Parser</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span><span class='id identifier rubyid_source'>source</span><span class='comma'>,</span> <span class='label'>max_entries:</span> <span class='id identifier rubyid_max_entries'>max_entries</span><span class='comma'>,</span> <span class='label'>filter:</span> <span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_sitemap'>sitemap</span> <span class='op'>=</span> <span class='const'>Sitemaps</span><span class='op'>::</span><span class='const'>Parser</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span><span class='id identifier rubyid_source'>source</span><span class='comma'>,</span> <span class='label'>max_entries:</span> <span class='id identifier rubyid_max_entries'>max_entries</span><span class='comma'>,</span> <span class='label'>filter:</span> <span class='id identifier rubyid_block'>block</span><span class='comma'>,</span> <span class='label'>filter_indexes:</span> <span class='id identifier rubyid_filter_indexes'>filter_indexes</span><span class='rparen'>)</span>
 
       <span class='comment'># save the results and queue up any submaps it found
 </span>      <span class='id identifier rubyid_maps'>maps</span><span class='lbracket'>[</span><span class='id identifier rubyid_url'>url</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_sitemap'>sitemap</span>
@@ -417,7 +417,7 @@ locations.</p>
 </div>
 
     <div id="footer">
-  Generated on Thu Mar 24 15:49:58 2016 by
+  Generated on Fri Mar 25 14:00:46 2016 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.1.2).
 </div>
